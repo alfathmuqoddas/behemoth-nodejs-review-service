@@ -31,7 +31,7 @@ export const getAllReviewsByMovie = async (
       .status(200)
       .json(formatPaginatedResponse(count, limit, currentPage, rows));
   } catch (error) {
-    logger.error({ error }, "Error retrieving movies");
+    logger.error({ error }, "Error retrieving reviews");
     next(error);
   }
 };
@@ -63,7 +63,7 @@ export const getAllReviewsByUser = async (
       .status(200)
       .json(formatPaginatedResponse(count, limit, currentPage, rows));
   } catch (error) {
-    logger.error({ error }, "Error retrieving movies");
+    logger.error({ error }, "Error retrieving reviews");
     next(error);
   }
 };
@@ -93,7 +93,7 @@ export const getAllReviews = async (
       .status(200)
       .json(formatPaginatedResponse(count, limit, currentPage, rows));
   } catch (error) {
-    logger.error({ error }, "Error retrieving movies");
+    logger.error({ error }, "Error retrieving reviews");
     next(error);
   }
 };
@@ -104,11 +104,11 @@ export const createReview = async (
   next: NextFunction
 ) => {
   try {
-    const movie = await Review.create(req.body);
+    const review = await Review.create(req.body);
     reviewsCreatedTotal.inc();
-    res.status(201).json(movie);
+    res.status(201).json(review);
   } catch (error: any) {
-    logger.error({ error }, "Error creating movie");
+    logger.error({ error }, "Error creating review");
     if (error.name === "SequelizeValidationError") {
       return next(
         new AppError(400, error.errors.map((e: any) => e.message).join(", "))
@@ -137,7 +137,7 @@ export const updateReview = async (
     await review.update(req.body);
     res.status(200).json(review);
   } catch (error: any) {
-    logger.error({ error }, `Error updating movie with id ${req.params.id}`);
+    logger.error({ error }, `Error updating review with id ${req.params.id}`);
     if (error.name === "SequelizeValidationError") {
       return next(
         new AppError(400, error.errors.map((e: any) => e.message).join(", "))
@@ -167,7 +167,7 @@ export const deleteReview = async (
     await review.destroy();
     res.status(204).send();
   } catch (error) {
-    logger.error({ error }, `Error deleting movie with id ${req.params.id}`);
+    logger.error({ error }, `Error deleting review with id ${req.params.id}`);
     next(error);
   }
 };

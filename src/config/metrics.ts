@@ -23,7 +23,6 @@ export const httpRequestDurationSeconds = new Histogram({
 export const reviewsCreatedTotal = new Counter({
   name: "reviews_created_total",
   help: "Total number of movies successfully added to the database",
-  labelNames: ["source"],
 });
 
 export { register };
