@@ -2,6 +2,7 @@ import app from "./app";
 import sequelize from "./config/database";
 import dotenv from "dotenv";
 import logger from "./config/logger";
+import { healthState } from "./utils/healthState";
 
 dotenv.config();
 
@@ -16,8 +17,12 @@ const startServer = async () => {
       logger.info(`Server is running on port ${PORT}`);
     });
 
+    healthState.markStarted();
+
     const gracefulShutdown = async (signal: string) => {
       logger.info(`${signal} signal received: starting graceful shutdown`);
+
+      healthState.markShuttingDown();
 
       server.close(async () => {
         logger.info("HTTP server closed.");
