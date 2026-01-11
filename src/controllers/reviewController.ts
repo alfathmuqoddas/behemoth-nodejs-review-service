@@ -1,17 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import Review from "../models/Review";
-import logger from "../config/logger";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { AppError } from "../utils/AppError";
+import catchAsync from "../utils/catchAsync";
 import { reviewsCreatedTotal } from "../config/metrics";
 import { getPagination, formatPaginatedResponse } from "../utils/pagination";
 
-export const getAllReviewsByMovie = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const getAllReviewsByMovie = catchAsync(
+  async (req: Request, res: Response) => {
     const { movieId } = req.params;
     const { limit, offset, currentPage } = getPagination(
       req.query.page,
@@ -30,18 +26,11 @@ export const getAllReviewsByMovie = async (
     res
       .status(200)
       .json(formatPaginatedResponse(count, limit, currentPage, rows));
-  } catch (error) {
-    logger.error({ error }, "Error retrieving reviews");
-    next(error);
   }
-};
+);
 
-export const getAllReviewsByUser = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const getAllReviewsByUser = catchAsync(
+  async (req: AuthRequest, res: Response) => {
     const userId = req.user?.userId;
     if (!userId) throw new AppError(401, "Unauthorized");
 
@@ -62,18 +51,11 @@ export const getAllReviewsByUser = async (
     res
       .status(200)
       .json(formatPaginatedResponse(count, limit, currentPage, rows));
-  } catch (error) {
-    logger.error({ error }, "Error retrieving reviews");
-    next(error);
   }
-};
+);
 
-export const getAllReviews = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const getAllReviews = catchAsync(
+  async (req: AuthRequest, res: Response) => {
     if (req.user?.role !== "admin") {
       throw new AppError(403, "Forbidden: Only admins can view all reviews");
     }
@@ -92,38 +74,17 @@ export const getAllReviews = async (
     res
       .status(200)
       .json(formatPaginatedResponse(count, limit, currentPage, rows));
-  } catch (error) {
-    logger.error({ error }, "Error retrieving reviews");
-    next(error);
   }
-};
+);
 
-export const createReview = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const review = await Review.create(req.body);
-    reviewsCreatedTotal.inc();
-    res.status(201).json(review);
-  } catch (error: any) {
-    logger.error({ error }, "Error creating review");
-    if (error.name === "SequelizeValidationError") {
-      return next(
-        new AppError(400, error.errors.map((e: any) => e.message).join(", "))
-      );
-    }
-    next(error);
-  }
-};
+export const createReview = catchAsync(async (req: Request, res: Response) => {
+  const review = await Review.create(req.body);
+  reviewsCreatedTotal.inc();
+  res.status(201).json(review);
+});
 
-export const updateReview = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const updateReview = catchAsync(
+  async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const userId = req.user?.userId;
     const userRole = req.user?.role;
@@ -136,23 +97,11 @@ export const updateReview = async (
 
     await review.update(req.body);
     res.status(200).json(review);
-  } catch (error: any) {
-    logger.error({ error }, `Error updating review with id ${req.params.id}`);
-    if (error.name === "SequelizeValidationError") {
-      return next(
-        new AppError(400, error.errors.map((e: any) => e.message).join(", "))
-      );
-    }
-    next(error);
   }
-};
+);
 
-export const deleteReview = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
+export const deleteReview = catchAsync(
+  async (req: AuthRequest, res: Response) => {
     const { id } = req.params;
     const userId = req.user?.userId;
     const userRole = req.user?.role;
@@ -166,8 +115,5 @@ export const deleteReview = async (
 
     await review.destroy();
     res.status(204).send();
-  } catch (error) {
-    logger.error({ error }, `Error deleting review with id ${req.params.id}`);
-    next(error);
   }
-};
+);
