@@ -21,7 +21,7 @@ router.get("/liveness", (_req, res) => {
  * - Traffic safety
  * - Fail when DB is unavailable
  */
-router.get("/readyness", async (_req, res) => {
+router.get("/readiness", async (_req, res) => {
   if (!healthState.isStarted() || healthState.isShuttingDown()) {
     return res.status(503).json({ status: "not-ready" });
   }
